@@ -37,8 +37,16 @@ http://iknowkungfoo.com/blog/index.cfm/2012/5/11/ArrayCollectioncfc-a-custom-JSO
 ```
 {    
     "data":[
-        {"bookid":8,"genre":"Fiction","title":"Apparition Man"},
-        {"bookid":2,"genre":"Non-fiction","title":"Shopping Mart Mania"}
+        {
+    		"bookid":8,
+			"genre":"Fiction",
+			"title":"Apparition Man"
+		},
+        {
+			"bookid":2,
+			"genre":"Non-fiction",
+			"title":"Shopping Mart Mania"
+		}
     ]
 }
 ```
