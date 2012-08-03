@@ -18,7 +18,7 @@
 
     <cffunction name="$renderdata" access="public" output="false" returntype="string" hint="convert a query to an array of structs">
         <cfset var rs = {} />
-        <cfset var rs.q = variables.data />
+        <cfset rs.q = variables.data />
         <cfset rs.results = [] />
         <cfset rs.columnList = lcase(listSort(rs.q.columnlist, "text" )) />
         <cfloop query="rs.q">
