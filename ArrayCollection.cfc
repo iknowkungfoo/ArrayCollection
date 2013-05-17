@@ -1,4 +1,4 @@
-<cfcomponent>
+<cfcomponent accessors="true">
 
 	<!---
 		Author: Adrian J. Moreno
@@ -9,62 +9,77 @@
 		Blog post: http://cfml.us/Ce
 	--->
 
+	<cfproperty name="data" type="query" required="true" />
+	<cfproperty name="contentType" type="string" required="true" />
+	<cfproperty name="dataHandle" type="boolean" required="true" />
+	<cfproperty name="dataKeys" type="boolean" required="true" />
+	<cfproperty name="dataHandleName" type="string" required="true" />
+	<cfproperty name="dataKeyCase" type="string" required="false" default="lower" />
+
     <cffunction name="init" access="public" output="false" returntype="ArrayCollection">
         <cfset setContentType("json") />
+        <cfset setDataKeys(true) />
+		<cfset setDataKeyCase("lower") />
         <cfset setDataHandle(true) />
         <cfset setDataHandleName("data") />
         <cfreturn this />
     </cffunction>
 
-    <cffunction name="$renderdata" access="public" output="false" returntype="string" hint="convert a query to an array of structs">
-        <cfset var rs = {} />
-        <cfset rs.q = variables.data />
-        <cfset rs.results = [] />
-        <cfset rs.columnList = lcase(listSort(rs.q.columnlist, "text" )) />
-        <cfloop query="rs.q">
-            <cfset rs.temp = {} />
-            <cfloop list="#rs.columnList#" index="rs.col">
-                <cfset rs.temp[rs.col] = rs.q[rs.col][rs.q.currentrow] />
-            </cfloop>
-            <cfset arrayAppend( rs.results, rs.temp ) />
-        </cfloop>
-        <cfset rs.data = {} />
-        <cfif hasDataHandle()>
-            <cfset rs.data[getDataHandleName()] = rs.results />
+    <cffunction name="$renderdata" access="public" output="false" returntype="string" hint="">
+		<cfset aData = [] />
+		<cfset stData = {} />
+        <cfif getDataKeys()>
+			<cfset aData = queryToArrayOfStructs() />
         <cfelse>
-            <cfset rs.data = rs.results />
+			<cfset aData = queryToArrayOfArrays() />
         </cfif>
-        <cfreturn serializeJSON(rs.data) />
+		<cfif getDataHandle()>
+			<cfset stData[getDataHandleName()] = aData />
+			<cfreturn serializeJSON(stData) />
+		<cfelse>
+			<cfreturn serializeJSON(aData) />
+		</cfif>
     </cffunction>
 
-    <cffunction name="setData" access="public" output="false" returntype="void">
-        <cfargument name="data" type="query" required="true">
-        <cfset variables.data = arguments.data />
+    <cffunction name="queryToArrayOfStructs" access="private" output="false" returntype="array" hint="convert a query to an array of structs">
+    	<cfset var q = getData() />
+		<cfset var columnList = getColumnList() />
+		<cfset var results = [] />
+		<cfset var temp = {} />
+		<cfset var col = "" />
+		<cfloop query="q">
+            <cfset temp = {} />
+            <cfloop list="#columnList#" index="col">
+                <cfset temp[col] = q[col][q.currentrow] />
+            </cfloop>
+            <cfset arrayAppend( results, temp ) />
+        </cfloop>
+		<cfreturn results />
     </cffunction>
 
-    <cffunction name="setContentType" access="private" output="false" returntype="void">
-        <cfargument name="contenttype" type="string" required="true" />
-        <cfset variables.contentType = arguments.contentType />
-    </cffunction>
-    <cffunction name="getContentType" access="public" output="false" returntype="string">
-        <cfreturn variables.contentType />
+    <cffunction name="queryToArrayOfArrays" access="private" output="false" returntype="array" hint="convert a query to an array of arrays">
+    	<cfset var q = getData() />
+		<cfset var columnList = getColumnList() />
+		<cfset var results = [] />
+		<cfset var temp = [] />
+		<cfset var col = "" />
+		<cfloop query="q">
+            <cfset temp = [] />
+            <cfloop list="#columnList#" index="col">
+				<cfset arrayAppend( temp, q[col][q.currentrow] ) />
+            </cfloop>
+            <cfset arrayAppend( results, temp ) />
+        </cfloop>
+		<cfreturn results />
     </cffunction>
 
-    <cffunction name="setDataHandle" access="public" output="false" returntype="void">
-        <cfargument name="datahandle" type="boolean" required="true" />
-        <cfset variables.dataHandle = arguments.datahandle />
-
-    </cffunction>
-    <cffunction name="hasDataHandle" access="public" output="false" returntype="boolean">
-        <cfreturn variables.dataHandle />
-    </cffunction>
-
-    <cffunction name="setDataHandleName" access="public" output="false" returntype="void">
-        <cfargument name="dataHandleName" type="string" required="true" />
-        <cfset variables.dataHandleName = arguments.dataHandleName />
-    </cffunction>
-    <cffunction name="getDataHandleName" access="public" output="false" returntype="string">
-        <cfreturn variables.dataHandleName />
+    <cffunction name="getColumnList" access="private" output="false" returntype="string">
+		<cfset var columns = listSort( getData().columnlist, "textnocase" ) />
+		<cfif getDataKeyCase() IS "lower">
+			<cfreturn lcase( columns ) />
+		<cfelse>
+			<cfreturn ucase( columns ) />
+		</cfif>
     </cffunction>
 
 </cfcomponent>
