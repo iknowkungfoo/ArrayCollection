@@ -50,3 +50,13 @@ http://iknowkungfoo.com/blog/index.cfm/2012/5/11/ArrayCollectioncfc-a-custom-JSO
     ]
 }
 ```
+
+**New in Version 2**
+
+The function setDataKeys() triggers the return of an array of structs (true) or an array of arrays (false).
+
+The function setDataKeyCase() changes the column names (keys) in the structs from lowercase (default) to uppercase.
+
+**Depricated**
+
+The function setDataType() was replaced with setDataKeys().
